@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - HRIS Premium</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #F8FAFC; }
+        .glass-card { background: #FFFFFF; box-shadow: 0 10px 30px -10px rgba(15, 23, 42, 0.05); border: 1px solid #F1F5F9; border-radius: 24px; }
+        .menu-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .menu-card:hover { transform: translateY(-4px); box-shadow: 0 20px 40px -15px rgba(37,99,235,0.12); border-color: #E2E8F0; }
+        /* Dropdown transition */
+        #profile-dropdown { transition: all 0.2s ease-in-out; transform-origin: top right; }
+    </style>
+</head>
+<body class="text-slate-800 pb-16">
+
+    <!-- Navbar / Header Modern Minimalis -->
+    <div class="w-full bg-gradient-to-br from-slate-900 via-indigo-950 to-blue-950 px-6 pt-10 pb-28 rounded-b-[48px] shadow-2xl relative">
+        <div class="max-w-4xl mx-auto flex justify-between items-center text-white">
+            <div class="flex items-center gap-4">
+                <!-- Avatar Profil yang bisa diklik -->
+                <div class="relative">
+                    <button onclick="toggleProfileDropdown(event)" class="h-14 w-14 rounded-2xl border-2 border-white/20 overflow-hidden bg-white/10 flex items-center justify-center cursor-pointer hover:border-blue-400 transition shadow-lg focus:outline-none">
+                        <img id="employee-avatar" src="" alt="Profile" class="w-full h-full object-cover">
+                    </button>
+                    
+                    <!-- DROPDOWN MENU PROFIL (Elegan & Interaktif) -->
+                    <div id="profile-dropdown" class="hidden absolute left-0 mt-3 w-72 bg-white rounded-3xl shadow-2xl border border-slate-100 py-3 px-4 text-slate-800 z-50">
+                        <div class="pb-3 border-b border-slate-100 mb-2">
+                            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Identitas Akun</p>
+                            <p id="dropdown-name" class="font-extrabold text-slate-900 text-base">Memuat...</p>
+                            <p id="dropdown-nik" class="text-xs text-slate-500 mt-0.5">NIK: -</p>
+                            <p id="dropdown-email" class="text-xs text-slate-400 truncate mt-0.5">-</p>
+                        </div>
+                        
+                        <div class="space-y-1">
+                            <a href="/dashboard" class="w-full px-3 py-2.5 rounded-xl hover:bg-slate-50 text-slate-700 font-semibold text-sm flex items-center gap-3 transition">
+                                <i data-lucide="layout-dashboard" class="w-4 h-4 text-blue-600"></i> Kembali ke Dashboard
+                            </a>
+                            <div onclick="handleLogout()" class="w-full px-3 py-2.5 rounded-xl hover:bg-rose-50 text-rose-600 font-semibold text-sm flex items-center gap-3 transition cursor-pointer">
+                                <i data-lucide="log-out" class="w-4 h-4"></i> Keluar
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <p class="text-slate-400 text-xs font-semibold uppercase tracking-wider">Selamat Datang</p>
+                    <h1 id="employee-name" class="text-xl md:text-2xl font-extrabold tracking-tight text-white mt-0.5">Memuat nama...</h1>
+                </div>
+            </div>
+
+            <!-- Tombol Keluar Cepat di Kanan Atas -->
+            <div>
+                <button onclick="handleLogout()" class="px-4 py-2.5 bg-white/10 hover:bg-rose-600/80 text-white font-semibold text-xs rounded-2xl backdrop-blur-md transition flex items-center gap-2 border border-white/15 cursor-pointer shadow-sm">
+                    <i data-lucide="log-out" class="w-4 h-4"></i> Keluar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="max-w-4xl mx-auto px-6 -mt-16 relative z-10">
+        
+        <!-- Menu Grid -->
+        <div class="flex items-center justify-between mb-4 px-2">
+            <h2 class="text-lg font-extrabold text-slate-900 tracking-tight">Menu Utama</h2>
+            <span class="text-xs font-semibold text-slate-400">Pilih layanan HRIS</span>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-5">
+            
+            <a href="/attendance/checkin" class="menu-card glass-card p-6 flex flex-col items-center justify-center gap-3 text-center cursor-pointer">
+                <div class="bg-blue-50 p-4 rounded-2xl text-blue-600"><i data-lucide="fingerprint" class="w-7 h-7"></i></div>
+                <span class="font-bold text-slate-700 text-sm">Absensi GPS</span>
+            </a>
+
+            <a href="/payroll" class="menu-card glass-card p-6 flex flex-col items-center justify-center gap-3 text-center cursor-pointer">
+                <div class="bg-emerald-50 p-4 rounded-2xl text-emerald-600"><i data-lucide="wallet" class="w-7 h-7"></i></div>
+                <span class="font-bold text-slate-700 text-sm">Slip Gaji</span>
+            </a>
+
+            <a href="/leave" class="menu-card glass-card p-6 flex flex-col items-center justify-center gap-3 text-center cursor-pointer">
+                <div class="bg-amber-50 p-4 rounded-2xl text-amber-600"><i data-lucide="calendar-days" class="w-7 h-7"></i></div>
+                <span class="font-bold text-slate-700 text-sm">Cuti & Izin</span>
+            </a>
+
+            <a href="/report" class="menu-card glass-card p-6 flex flex-col items-center justify-center gap-3 text-center cursor-pointer">
+                <div class="bg-indigo-50 p-4 rounded-2xl text-indigo-600"><i data-lucide="briefcase" class="w-7 h-7"></i></div>
+                <span class="font-bold text-slate-700 text-sm">Laporan Kerja</span>
+            </a>
+
+            <a href="/announcement" class="menu-card glass-card p-6 flex flex-col items-center justify-center gap-3 text-center cursor-pointer">
+                <div class="bg-rose-50 p-4 rounded-2xl text-rose-600"><i data-lucide="bell" class="w-7 h-7"></i></div>
+                <span class="font-bold text-slate-700 text-sm">Pengumuman</span>
+            </a>
+
+            <a href="/settings" class="menu-card glass-card p-6 flex flex-col items-center justify-center gap-3 text-center cursor-pointer">
+                <div class="bg-slate-100 p-4 rounded-2xl text-slate-600"><i data-lucide="settings" class="w-7 h-7"></i></div>
+                <span class="font-bold text-slate-700 text-sm">Pengaturan</span>
+            </a>
+        </div>
+    </div>
+        
+    <script>
+        lucide.createIcons();
+
+        // Fungsi Toggle Dropdown Profil
+        function toggleProfileDropdown(event) {
+            event.stopPropagation();
+            const dropdown = document.getElementById('profile-dropdown');
+            dropdown.classList.toggle('hidden');
+        }
+
+        // Tutup dropdown jika mengklik di luar area profil
+        window.addEventListener('click', function() {
+            const dropdown = document.getElementById('profile-dropdown');
+            if (!dropdown.classList.contains('hidden')) {
+                dropdown.classList.add('hidden');
+            }
+        });
+
+        // Fungsi Log Out
+        function handleLogout() {
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('user_role');
+            window.location.href = '/login';
+        }
+
+        // Ambil data profil karyawan secara real-time dari database
+        async function loadDashboardData() {
+            try {
+                const token = localStorage.getItem('access_token');
+                if (!token) {
+                    window.location.href = '/login'; 
+                    return;
+                }
+
+                const res = await fetch('/api/v1/profile', {
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    }
+                });
+
+                if (!res.ok) throw new Error("Gagal memuat data profil");
+
+                const data = await res.json();
+
+                // 1. Tampilkan Nama di Header Utama
+                const nameHeader = document.getElementById('employee-name');
+                if (nameHeader && data.full_name) {
+                    nameHeader.innerText = data.full_name;
+                }
+
+                // 2. Tampilkan Data di Menu Dropdown Identitas
+                document.getElementById('dropdown-name').innerText = data.full_name || '-';
+                document.getElementById('dropdown-nik').innerText = `NIK: ${data.nik || '-'}`;
+                document.getElementById('dropdown-email').innerText = data.email || '-';
+
+                // 3. Generate Avatar Inisial Otomatis
+                const avatarImg = document.getElementById('employee-avatar');
+                if (avatarImg && data.full_name) {
+                    const encodedName = encodeURIComponent(data.full_name);
+                    avatarImg.src = `https://ui-avatars.com/api/?name=${encodedName}&background=0D9488&color=fff&bold=true`;
+                }
+
+            } catch (error) {
+                console.error("Error:", error);
+                const nameHeader = document.getElementById('employee-name');
+                if (nameHeader) nameHeader.innerText = "Karyawan";
+            }
+        }
+
+        // Jalankan saat halaman dibuka
+        loadDashboardData();
+    </script>
+</body>
+</html>

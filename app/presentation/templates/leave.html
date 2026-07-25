@@ -1,0 +1,77 @@
+<!-- app/templates/leave.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pengajuan Cuti - HRIS Premium</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #F8FAFC; }</style>
+</head>
+<body class="p-6">
+    <div class="max-w-2xl mx-auto bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden">
+        <div class="bg-gradient-to-r from-amber-500 to-orange-400 p-6 text-white">
+            <h2 class="text-2xl font-bold">Pengajuan Cuti & Izin</h2>
+            <p class="text-amber-100 text-sm mt-1">Isi formulir untuk mengajukan ketidakhadiran.</p>
+        </div>
+        
+        <form id="leaveForm" class="p-6 space-y-5" onsubmit="submitLeave(event)">
+            <div>
+                <label class="block text-sm font-semibold text-slate-700 mb-2">Jenis Cuti</label>
+                <select id="leave_type" class="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-amber-500 outline-none">
+                    <option value="TAHUNAN">Cuti Tahunan (Sisa: 12 Hari)</option>
+                    <option value="SAKIT">Izin Sakit (Wajib Surat Dokter)</option>
+                    <option value="PRIBADI">Izin Keperluan Pribadi</option>
+                </select>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">Tanggal Mulai</label>
+                    <input type="date" id="start_date" required class="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">Tanggal Selesai</label>
+                    <input type="date" id="end_date" required class="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 outline-none">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-semibold text-slate-700 mb-2">Alasan Lengkap</label>
+                <textarea id="reason" rows="3" required class="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 outline-none resize-none" placeholder="Jelaskan alasan cuti/izin Anda..."></textarea>
+            </div>
+
+            <button type="submit" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-4 rounded-xl shadow-lg transition-all active:scale-[0.98]">
+                Kirim Pengajuan
+            </button>
+        </form>
+    </div>
+
+    <script>
+        async function submitLeave(e) {
+            e.preventDefault();
+            const token = localStorage.getItem('access_token');
+            const data = {
+                leave_type: document.getElementById('leave_type').value,
+                start_date: document.getElementById('start_date').value,
+                end_date: document.getElementById('end_date').value,
+                reason: document.getElementById('reason').value
+            };
+
+            const response = await fetch('/api/v1/leave/request', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                body: JSON.stringify(data)
+            });
+            const resData = await response.json();
+            if (response.ok) {
+                alert('Berhasil: ' + resData.message);
+                window.location.href = '/dashboard';
+            } else {
+                alert('Gagal: ' + (resData.message || 'Terjadi kesalahan'));
+            }
+        }
+    </script>
+</body>
+</html>

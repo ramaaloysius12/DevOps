@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HRD Dashboard - HRIS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { background-color: #F8FAFC; font-family: 'Plus Jakarta Sans', sans-serif; }
+        /* Animasi kustom untuk modal */
+        .modal-enter { animation: modalFadeIn 0.3s ease-out forwards; }
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: scale(0.95) translateY(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <!-- Top Navigation Bar Modern -->
+    <nav class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3 text-blue-600">
+                <div class="bg-blue-100 p-2 rounded-xl">
+                    <i data-lucide="layers" class="w-6 h-6 text-blue-600"></i>
+                </div>
+                <span class="font-extrabold text-xl tracking-tight">HRIS<span class="text-slate-800">Panel</span></span>
+            </div>
+            
+            <div class="flex items-center gap-4">
+                <button onclick="window.location.href='/settings'" class="p-2 text-slate-400 hover:text-blue-600 transition bg-slate-50 hover:bg-blue-50 rounded-full">
+                    <i data-lucide="settings" class="w-5 h-5"></i>
+                </button>
+                <div class="w-px h-6 bg-slate-200"></div>
+                <button onclick="logout()" class="flex items-center gap-2 px-4 py-2 bg-rose-50 text-rose-600 font-bold rounded-xl hover:bg-rose-100 transition-colors">
+                    <i data-lucide="log-out" class="w-4 h-4"></i> Logout
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="max-w-6xl mx-auto p-6 mt-4">
+        
+        <!-- Welcome Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-extrabold text-slate-900">HRD Command Center</h1>
+            <p class="text-slate-500 mt-2 text-lg">Pantau kehadiran secara real-time dan kelola operasional perusahaan.</p>
+        </div>
+
+        <!-- 4 STATISTIK CARDS (Real-Time) -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-10">
+            <!-- Card Karyawan -->
+            <div class="bg-white p-5 md:p-6 rounded-3xl border border-slate-100 shadow-sm hover:shadow-md transition">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="text-slate-500 font-medium text-sm md:text-base">Total Karyawan</div>
+                    <div class="p-2 bg-blue-50 rounded-lg text-blue-500"><i data-lucide="users" class="w-5 h-5"></i></div>
+                </div>
+                <div id="stat-karyawan" class="text-4xl font-black text-slate-800">0</div>
+            </div>
+            
+            <!-- Card Hadir -->
+            <div class="bg-white p-5 md:p-6 rounded-3xl border border-slate-100 shadow-sm hover:shadow-md transition">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="text-slate-500 font-medium text-sm md:text-base">Hadir Hari Ini</div>
+                    <div class="p-2 bg-emerald-50 rounded-lg text-emerald-500"><i data-lucide="check-circle" class="w-5 h-5"></i></div>
+                </div>
+                <div id="stat-hadir" class="text-4xl font-black text-emerald-600">0</div>
+            </div>
+
+            <!-- Card Izin/Cuti -->
+            <div class="bg-white p-5 md:p-6 rounded-3xl border border-slate-100 shadow-sm hover:shadow-md transition relative">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="text-slate-500 font-medium text-sm md:text-base">Izin & Cuti</div>
+                    <div class="p-2 bg-amber-50 rounded-lg text-amber-500"><i data-lucide="calendar-clock" class="w-5 h-5"></i></div>
+                </div>
+                <div id="stat-izin" class="text-4xl font-black text-amber-500">0</div>
+                <!-- Badge Notifikasi Cuti -->
+                <div id="badge-pending" class="hidden absolute -top-2 -right-2 bg-rose-500 text-white text-[10px] md:text-xs font-bold px-3 py-1 rounded-full animate-pulse shadow-md">
+                    0 Menunggu
+                </div>
+            </div>
+            
+            <!-- Card Alfa -->
+            <div class="bg-white p-5 md:p-6 rounded-3xl border border-slate-100 shadow-sm hover:shadow-md transition">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="text-slate-500 font-medium text-sm md:text-base">Alfa (Bolos)</div>
+                    <div class="p-2 bg-rose-50 rounded-lg text-rose-500"><i data-lucide="user-x" class="w-5 h-5"></i></div>
+                </div>
+                <div id="stat-alfa" class="text-4xl font-black text-rose-600">0</div>
+            </div>
+        </div>
+
+        <!-- MENU UTAMA: BERBENTUK CARD ICON DI TENGAH -->
+        <h2 class="text-xl font-bold text-slate-800 mb-4">Menu Utama</h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+            
+            <!-- Menu 1: Tambah Karyawan -->
+            <button onclick="document.getElementById('addEmpModal').classList.remove('hidden')" 
+                    class="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm hover:shadow-lg hover:border-blue-500 transition-all flex flex-col items-center justify-center gap-4 group">
+                <div class="p-5 bg-blue-50 text-blue-600 rounded-2xl group-hover:bg-blue-600 group-hover:text-white group-hover:scale-110 transition-all duration-300">
+                    <i data-lucide="user-plus" class="w-8 h-8"></i>
+                </div>
+                <span class="font-bold text-slate-700 text-center">Tambah Karyawan</span>
+            </button>
+
+            <!-- Menu 2: Buat Pengumuman -->
+            <button onclick="document.getElementById('announcementModal').classList.remove('hidden')" 
+                    class="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm hover:shadow-lg hover:border-indigo-500 transition-all flex flex-col items-center justify-center gap-4 group">
+                <div class="p-5 bg-indigo-50 text-indigo-600 rounded-2xl group-hover:bg-indigo-600 group-hover:text-white group-hover:scale-110 transition-all duration-300">
+                    <i data-lucide="megaphone" class="w-8 h-8"></i>
+                </div>
+                <span class="font-bold text-slate-700 text-center">Buat Pengumuman</span>
+            </button>
+
+            <!-- Menu 3: Persetujuan Cuti -->
+            <button onclick="window.location.href='/approval'" 
+                    class="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm hover:shadow-lg hover:border-emerald-500 transition-all flex flex-col items-center justify-center gap-4 group">
+                <div class="p-5 bg-emerald-50 text-emerald-600 rounded-2xl group-hover:bg-emerald-600 group-hover:text-white group-hover:scale-110 transition-all duration-300">
+                    <i data-lucide="check-square" class="w-8 h-8"></i>
+                </div>
+                <span class="font-bold text-slate-700 text-center">Persetujuan Cuti</span>
+            </button>
+
+            <!-- Menu 4: Kelola Payroll -->
+            <button onclick="window.location.href='/payroll-admin'" 
+                    class="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm hover:shadow-lg hover:border-purple-500 transition-all flex flex-col items-center justify-center gap-4 group">
+                <div class="p-5 bg-purple-50 text-purple-600 rounded-2xl group-hover:bg-purple-600 group-hover:text-white group-hover:scale-110 transition-all duration-300">
+                    <i data-lucide="calculator" class="w-8 h-8"></i>
+                </div>
+                <span class="font-bold text-slate-700 text-center">Kelola Payroll</span>
+            </button>
+
+        </div>
+    </div>
+
+    <!-- ================= MODALS ================= -->
+
+    <!-- MODAL 1: Tambah Karyawan -->
+    <div id="addEmpModal" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+        <div class="bg-white p-8 rounded-3xl w-full max-w-md shadow-2xl border border-slate-100 modal-enter">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-slate-800">Karyawan Baru</h2>
+                <button onclick="document.getElementById('addEmpModal').classList.add('hidden')" class="text-slate-400 hover:text-rose-500 bg-slate-50 p-2 rounded-full"><i data-lucide="x"></i></button>
+            </div>
+            <form id="addEmpForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-1">Nama Lengkap</label>
+                    <input type="text" id="full_name" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-1">Email</label>
+                    <input type="email" id="email" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-1">NIK</label>
+                    <input type="text" id="nik" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-1">Password Sementara</label>
+                    <input type="password" id="password" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" required>
+                </div>
+                <div class="pt-4">
+                    <button type="submit" class="w-full p-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg shadow-blue-200 transition">Simpan Karyawan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 2: Buat Pengumuman -->
+    <div id="announcementModal" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-3xl w-full max-w-lg shadow-2xl border border-slate-100 overflow-hidden modal-enter">
+            <!-- Header Modal Gradient -->
+            <div class="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-5 flex justify-between items-center">
+                <div>
+                    <h2 class="text-white font-bold text-xl flex items-center gap-2">
+                        <i data-lucide="megaphone" class="w-5 h-5 text-blue-100"></i> Buat Pengumuman
+                    </h2>
+                </div>
+                <button onclick="document.getElementById('announcementModal').classList.add('hidden')" class="text-white/70 hover:text-white bg-white/10 p-2 rounded-full"><i data-lucide="x"></i></button>
+            </div>
+            <!-- Body Modal -->
+            <div class="p-6">
+                <form id="announcementForm" class="space-y-5">
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-2">Judul Pengumuman</label>
+                        <input type="text" id="title" placeholder="Contoh: Libur Nasional 17 Agustus" 
+                               class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 outline-none transition" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-2">Isi Pesan</label>
+                        <textarea id="content" rows="4" placeholder="Tulis rincian pengumuman di sini..." 
+                                  class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 outline-none transition resize-none" required></textarea>
+                    </div>
+                    <div class="flex justify-end pt-2">
+                        <button type="submit" 
+                                class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-4 rounded-2xl font-bold shadow-lg shadow-indigo-200 transition-all flex justify-center items-center gap-2">
+                            <i data-lucide="send" class="w-4 h-4"></i> Posting ke Karyawan
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= SCRIPTS ================= -->
+    <script>
+        // Render Icons
+        lucide.createIcons();
+
+        // Fungsi Logout
+        function logout() {
+            localStorage.clear();
+            window.location.href = '/login';
+        }
+
+        // --- SISTEM REALTIME STATISTIK ---
+        async function loadRealtimeStats() {
+            try {
+                const res = await fetch('/api/v1/admin/realtime-stats');
+                if (res.ok) {
+                    const data = await res.json();
+                    
+                    document.getElementById('stat-karyawan').innerText = data.total_karyawan;
+                    document.getElementById('stat-hadir').innerText = data.hadir;
+                    document.getElementById('stat-izin').innerText = data.izin_cuti;
+                    document.getElementById('stat-alfa').innerText = data.alfa;
+                    
+                    // Notifikasi Cuti Merah Berkedip
+                    const pendingBadge = document.getElementById('badge-pending');
+                    if (data.pending_cuti > 0) {
+                        pendingBadge.innerText = `${data.pending_cuti} Menunggu`;
+                        pendingBadge.classList.remove('hidden');
+                    } else {
+                        pendingBadge.classList.add('hidden');
+                    }
+                }
+            } catch (error) {
+                console.error("Gagal mengambil data statistik", error);
+            }
+        }
+
+        // Jalankan saat halaman dibuka, dan update tiap 30 detik
+        loadRealtimeStats();
+        setInterval(loadRealtimeStats, 30000);
+
+        // --- LOGIC FORM ---
+        document.getElementById('addEmpForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const data = {
+                full_name: document.getElementById('full_name').value,
+                email: document.getElementById('email').value,
+                nik: document.getElementById('nik').value,
+                password: document.getElementById('password').value,
+                position: "Staff",
+                department: "General"
+            };
+            const res = await fetch('/api/v1/admin/add-employee', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            });
+            if(res.ok) { 
+                alert('Karyawan berhasil ditambahkan!'); 
+                location.reload(); 
+            } else {
+                alert('Gagal menambahkan karyawan.');
+            }
+        }
+
+        document.getElementById('announcementForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const title = document.getElementById('title').value;
+            const content = document.getElementById('content').value;
+
+            try {
+                const res = await fetch('/api/v1/announcement', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json', 
+                        'Authorization': 'Bearer ' + localStorage.getItem('access_token')
+                    },
+                    body: JSON.stringify({ title, content })
+                });
+                
+                if(res.ok) { 
+                    alert('Pengumuman berhasil diposting!'); 
+                    document.getElementById('announcementForm').reset();
+                    document.getElementById('announcementModal').classList.add('hidden');
+                } else {
+                    alert('Gagal memposting. Pastikan backend sudah menerima rute POST.');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Terjadi kesalahan jaringan.');
+            }
+        };
+    </script>
+</body>
+</html>

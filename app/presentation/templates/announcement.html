@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Pengumuman</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #F8FAFC; }</style>
+</head>
+<body class="p-6">
+    <div class="max-w-md mx-auto">
+        <div class="flex items-center gap-4 mb-6">
+            <button onclick="window.location.href='/dashboard'" class="p-2 bg-white rounded-full shadow"><i data-lucide="arrow-left" class="w-5 h-5"></i></button>
+            <h2 class="text-2xl font-bold text-slate-800">Pengumuman HRD</h2>
+        </div>
+        
+        <!-- List Pengumuman (Struktur asli Anda) -->
+        <div class="space-y-4">
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 border-l-4 border-l-rose-500">
+                <span class="text-xs font-bold text-rose-500">PENTING • Hari Ini</span>
+                <h3 class="font-bold text-slate-800 mt-1">Libur Nasional 17 Agustus</h3>
+                <p class="text-sm text-slate-500 mt-2">Diberitahukan kepada seluruh karyawan, kantor akan tutup pada peringatan Hari Kemerdekaan.</p>
+            </div>
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 border-l-4 border-l-blue-500">
+                <span class="text-xs font-bold text-blue-500">INFO • Kemarin</span>
+                <h3 class="font-bold text-slate-800 mt-1">Jadwal Maintenance Server</h3>
+                <p class="text-sm text-slate-500 mt-2">Server HRIS akan mengalami downtime selama 15 menit pada pukul 00:00 WIB malam ini.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        // Logika tampilkan form jika HRD
+        // Sesuaikan '1' dengan ID role HRD Anda di database
+        if (localStorage.getItem('user_role') == '1') { 
+            document.getElementById('hrd-section').classList.remove('hidden');
+        }   
+          
+        async function loadAnnouncements() {
+        const res = await fetch('/api/v1/announcements'); // Pastikan endpoint ini me-return list pengumuman
+        const data = await res.json();
+        const list = document.getElementById('announcement-list');
+        
+        list.innerHTML = data.map(item => `
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 border-l-4 border-l-blue-500">
+                <h3 class="font-bold text-slate-800">${item.title}</h3>
+                <p class="text-sm text-slate-500 mt-2">${item.content}</p>
+                <p class="text-xs text-slate-400 mt-3 italic">${new Date(item.created_at).toLocaleDateString()}</p>
+            </div>
+        `).join('');
+    }
+    loadAnnouncements();
+
+    function goToDashboard(e) {
+        if(e) e.preventDefault(); // Mencegah link default berjalan
+        
+        // Cek role dari localStorage
+        const userRole = localStorage.getItem('user_role');
+        
+        if (userRole == 1) {
+            window.location.href = '/dashboard-hrd'; // Jika HRD, ke sini
+        } else {
+            window.location.href = '/dashboard';     // Jika Karyawan, ke sini
+        }
+    }
+
+
+
+    </script>
+</body>
+</html>

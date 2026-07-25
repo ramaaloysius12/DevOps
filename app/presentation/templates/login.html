@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - HRIS Premium</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            min-height: 100vh;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center p-4">
+
+    <div class="glass-panel w-full max-w-md p-8 md:p-10 transition-all">
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-100 text-blue-600 mb-4">
+                <i data-lucide="building-2" class="w-8 h-8"></i>
+            </div>
+            <h1 class="text-2xl font-bold text-slate-800 tracking-tight">HRIS Enterprise</h1>
+            <p class="text-sm text-slate-500 mt-2">Silakan masuk menggunakan akun Anda</p>
+        </div>
+
+        <form id="loginForm" class="space-y-6" onsubmit="handleLogin(event)">
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-2">Email Perusahaan</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i data-lucide="mail" class="w-5 h-5 text-slate-400"></i>
+                    </div>
+                    <input type="email" id="email" required
+                        class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-slate-50 outline-none text-slate-700" 
+                        placeholder="ahmad@perusahaan.com">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-2">Password</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i data-lucide="lock" class="w-5 h-5 text-slate-400"></i>
+                    </div>
+                    <input type="password" id="password" required
+                        class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-slate-50 outline-none text-slate-700" 
+                        placeholder="••••••••">
+                </div>
+            </div>
+
+            <div id="error-message" class="hidden text-sm text-rose-500 font-medium text-center bg-rose-50 p-3 rounded-lg"></div>
+
+            <button type="submit" id="submitBtn" 
+                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3.5 rounded-xl shadow-lg shadow-blue-500/30 transition-all active:scale-[0.98] flex justify-center items-center gap-2">
+                <span>Masuk Dashboard</span>
+                <i data-lucide="arrow-right" class="w-5 h-5"></i>
+            </button>
+        </form>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const btn = document.getElementById('submitBtn');
+            const errorDiv = document.getElementById('error-message');
+            
+            btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Memproses...`;
+            btn.disabled = true;
+            lucide.createIcons();
+            errorDiv.classList.add('hidden');
+
+            try {
+                const response = await fetch('/api/v1/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.status === "success") {
+                    localStorage.setItem('access_token', data.token);
+                    localStorage.setItem('user_name', data.data.name);
+                    localStorage.setItem('user_role', data.data.role);
+                    if (data.data.role == 1) {
+        window.location.href = '/dashboard-hrd'; // HRD ke sini
+    } else {
+        window.location.href = '/dashboard';     // Karyawan ke sini
+    }
+} else {
+    throw new Error(data.message || "Gagal login, periksa kredensial Anda.");
+}
+
+            } catch (err) {
+                errorDiv.innerText = err.message;
+                errorDiv.classList.remove('hidden');
+            } finally {
+                btn.innerHTML = `<span>Masuk Dashboard</span><i data-lucide="arrow-right" class="w-5 h-5"></i>`;
+                btn.disabled = false;
+                lucide.createIcons();
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,102 @@
+<body class="bg-slate-50 p-6">
+    <div class="max-w-4xl mx-auto">
+        <div class="flex items-center gap-4 mb-8">
+            <!-- INI YANG DIUBAH: onclick="goToDashboard(event)" -->
+            <button onclick="goToDashboard(event)" class="p-2 bg-white rounded-full shadow border hover:bg-slate-100 transition">
+                <i data-lucide="chevron-left"></i>
+            </button>
+            <h2 class="text-2xl font-bold text-slate-800">Persetujuan Cuti</h2>
+        </div>
+
+        <div id="leave-list" class="space-y-4">
+            <!-- Data akan dimuat di sini -->
+        </div>
+    </div>
+
+    <!-- Script template baris -->
+    <script>
+        lucide.createIcons();
+
+    // Fungsi Pintar Kembali ke Dashboard
+    function goToDashboard(e) {
+        if(e) e.preventDefault(); 
+        const userRole = localStorage.getItem('user_role');
+        if (userRole == 1) {
+            window.location.href = '/dashboard-hrd'; 
+        } else {
+            window.location.href = '/dashboard';     
+        }
+    }
+
+    // Fungsi untuk menampilkan desain (Card)
+    function renderApprovalCard(item) {
+        return `
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex justify-between items-center transition hover:shadow-md">
+            <div>
+                <h3 class="font-bold text-lg text-slate-800">${item.employee_name}</h3>
+                <p class="text-slate-500 text-sm font-semibold mb-1">Tanggal: ${item.start_date} s/d ${item.end_date}</p>
+                <p class="text-slate-600 italic">" ${item.reason} "</p>
+            </div>
+            <div class="flex gap-3">
+                <button onclick="updateStatus('${item.id}', 'REJECTED')" 
+                        class="px-5 py-2.5 bg-rose-50 text-rose-600 font-bold rounded-xl hover:bg-rose-100 transition">Tolak</button>
+                <button onclick="updateStatus('${item.id}', 'APPROVED')" 
+                        class="px-5 py-2.5 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 shadow-lg shadow-emerald-200 transition">Terima</button>
+            </div>
+        </div>`;
+    }
+
+    // --- TAMBAHAN BARU: Mengambil data dari backend ---
+    async function loadPendingLeaves() {
+        try {
+            const list = document.getElementById('leave-list');
+            list.innerHTML = '<p class="text-center text-slate-500 py-4">Memuat data pengajuan...</p>';
+
+            const res = await fetch('/api/v1/admin/leaves/pending', {
+                headers: { 'Authorization': 'Bearer ' + localStorage.getItem('access_token') }
+            });
+            
+            const data = await res.json();
+
+            if (data.length === 0) {
+                list.innerHTML = `<div class="bg-white p-6 rounded-2xl text-center text-slate-500 border border-slate-200 shadow-sm">Belum ada pengajuan cuti yang menunggu.</div>`;
+                return;
+            }
+
+            // Render semua data ke HTML
+            list.innerHTML = data.map(item => renderApprovalCard(item)).join('');
+        } catch (error) {
+            console.error("Gagal memuat data cuti", error);
+        }
+    }
+
+    // --- TAMBAHAN BARU: Mengirim aksi Terima/Tolak ke backend ---
+    async function updateStatus(id, newStatus) {
+        const confirmMsg = newStatus === 'APPROVED' ? 'Setujui cuti ini?' : 'Tolak cuti ini?';
+        if (!confirm(confirmMsg)) return;
+
+        try {
+            const res = await fetch(`/api/v1/admin/leave/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + localStorage.getItem('access_token')
+                },
+                body: JSON.stringify({ status: newStatus })
+            });
+
+            if (res.ok) {
+                // Refresh daftar jika sukses
+                loadPendingLeaves();
+            } else {
+                alert('Gagal memproses persetujuan.');
+            }
+        } catch (error) {
+            console.error("Error", error);
+        }
+    }
+
+    // Jalankan saat halaman pertama kali dibuka
+    loadPendingLeaves();
+    </script>
+</body>

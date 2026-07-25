@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manajemen Payroll - HRIS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { background-color: #F8FAFC; font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
+</head>
+<body class="text-slate-800 p-6">
+
+    <div class="max-w-6xl mx-auto mt-2">
+        
+        <!-- Header dengan Tombol Kembali Pintar -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+            <div class="flex items-center gap-4">
+                <button onclick="goToDashboard(event)" class="p-3 bg-white rounded-2xl shadow-sm border border-slate-200 hover:bg-slate-50 transition flex items-center justify-center">
+                    <i data-lucide="chevron-left" class="w-5 h-5 text-slate-600"></i>
+                </button>
+                <div>
+                    <h1 class="text-2xl md:text-3xl font-extrabold text-slate-900">Manajemen Payroll</h1>
+                    <p class="text-slate-500 text-sm mt-0.5">Kelola gaji pokok, tunjangan, dan slip gaji karyawan periode <span class="font-semibold text-slate-700">Juli 2026</span></p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-3">
+                <button onclick="alert('Fitur cetak massal segera hadir!')" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-2xl font-bold flex items-center gap-2 shadow-lg shadow-purple-200 transition">
+                    <i data-lucide="printer" class="w-4 h-4"></i> Cetak Semua Slip
+                </button>
+            </div>
+        </div>
+
+        <!-- Kartu Statistik Ringkasan -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
+                <div class="text-slate-500 font-medium text-sm mb-1">Total Pengeluaran Gaji</div>
+                <div id="total-pengeluaran" class="text-3xl font-black text-slate-800">Rp 0</div>
+            </div>
+            <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
+                <div class="text-slate-500 font-medium text-sm mb-1">Karyawan Tergaji</div>
+                <div id="total-karyawan-count" class="text-3xl font-black text-purple-600">0 Orang</div>
+            </div>
+            <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
+                <div class="text-slate-500 font-medium text-sm mb-1">Status Periode</div>
+                <div class="inline-block mt-1 px-3 py-1 bg-emerald-50 text-emerald-600 font-bold text-xs rounded-full uppercase tracking-wider">Aktif / Draft</div>
+            </div>
+        </div>
+
+        <!-- Tabel Payroll Modern (Real-Time dari Database) -->
+        <div class="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
+            <div class="p-6 border-b border-slate-100 flex justify-between items-center">
+                <h3 class="font-bold text-lg text-slate-800 flex items-center gap-2">
+                    <i data-lucide="file-text" class="w-5 h-5 text-purple-600"></i> Daftar Gaji Karyawan
+                </h3>
+                <span class="text-xs text-slate-400">Terhubung langsung ke database karyawan</span>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-50/75 border-b border-slate-100 text-slate-500 text-xs uppercase tracking-wider">
+                            <th class="p-5 font-bold">Nama Karyawan</th>
+                            <th class="p-5 font-bold">Gaji Pokok (Rp)</th>
+                            <th class="p-5 font-bold">Tunjangan (Rp)</th>
+                            <th class="p-5 font-bold">Potongan / Alfa (Rp)</th>
+                            <th class="p-5 font-bold">Total Bersih</th>
+                            <th class="p-5 font-bold text-center">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="payroll-tbody" class="divide-y divide-slate-100 text-sm">
+                        <!-- Data Karyawan akan dimasukkan otomatis lewat JavaScript -->
+                        <tr>
+                            <td colspan="6" class="p-8 text-center text-slate-400">Memuat data karyawan dari database...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        // Fungsi Pintar Kembali ke Dashboard Berdasarkan Role
+        function goToDashboard(e) {
+            if(e) e.preventDefault(); 
+            const userRole = localStorage.getItem('user_role');
+            if (userRole == 1) {
+                window.location.href = '/dashboard-hrd'; 
+            } else {
+                window.location.href = '/dashboard';     
+            }
+        }
+
+        // Ambil data karyawan secara real-time dari API Backend
+        async function loadPayrollData() {
+            const tbody = document.getElementById('payroll-tbody');
+            
+            try {
+                console.log("Mengambil data payroll dari server...");
+                const res = await fetch('/api/v1/admin/payroll-list');
+                
+                if (!res.ok) throw new Error("Gagal merespons dari server");
+                
+                const employees = await res.json();
+                console.log("Data karyawan diterima:", employees);
+                
+                if (!employees || employees.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-slate-400">Data karyawan kosong di database.</td></tr>`;
+                    return;
+                }
+
+                // Update jumlah karyawan di kartu statistik
+                document.getElementById('total-karyawan-count').innerText = `${employees.length} Orang`;
+
+                // Kosongkan tabel sebelum diisi
+                tbody.innerHTML = '';
+
+                // Render setiap karyawan ke dalam baris tabel
+                employees.forEach(emp => {
+                    const row = `
+                    <tr class="hover:bg-slate-50/50 transition">
+                        <td class="p-5">
+                            <div class="font-bold text-slate-800 text-base">${emp.full_name}</div>
+                            <div class="text-xs text-slate-500">${emp.position || 'Staff'} &bull; NIK: ${emp.nik}</div>
+                        </td>
+                        <td class="p-5">
+                            <input type="number" value="4500000" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none text-right font-semibold">
+                        </td>
+                        <td class="p-5">
+                            <input type="number" value="300000" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none text-right font-semibold">
+                        </td>
+                        <td class="p-5">
+                            <input type="number" value="0" class="w-full p-3 bg-slate-50 border border-slate-200 text-rose-600 rounded-xl focus:ring-2 focus:ring-rose-500 outline-none text-right font-semibold">
+                        </td>
+                        <td class="p-5 text-right font-black text-emerald-600 text-base">Rp 4.800.000</td>
+                        <td class="p-5 text-center">
+                            <button onclick="alert('Slip gaji berhasil dikirim ke ${emp.full_name}!')" class="p-3 bg-purple-50 text-purple-600 rounded-xl hover:bg-purple-600 hover:text-white transition shadow-sm" title="Kirim Slip Gaji">
+                                <i data-lucide="send" class="w-4 h-4"></i>
+                            </button>
+                        </td>
+                    </tr>`;
+                    tbody.innerHTML += row;
+                });
+
+                // Perbarui ikon Lucide pada elemen yang baru dimuat
+                lucide.createIcons();
+
+            } catch (error) {
+                console.error("Terjadi kesalahan:", error);
+                tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-rose-500">Gagal merender data ke tabel. Cek Console browser (F12).</td></tr>`;
+            }
+        }
+
+        // Jalankan fungsi saat halaman dibuka
+        loadPayrollData();
+       
+    </script>
+</body>
+</html>
