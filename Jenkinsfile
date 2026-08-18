@@ -33,17 +33,19 @@ pipeline {
             }
         }
 
-        stage('3. Run Pytest') {
-            steps {
-                echo 'Menjalankan unit testing dengan pytest...'
-                dir('hris_web') {
-                    sh '''
-                        . ${VENV_NAME}/bin/activate
-                        pytest -v
-                    '''
-                }
-            }
+    stage('3. Run Pytest') {
+    steps {
+        echo 'Menjalankan unit testing dengan pytest...'
+        dir('hris_web') {
+            sh '''
+                . ${VENV_NAME}/bin/activate
+                # Tentukan folder atau file test jika tidak berada di root hris_web
+                pytest -v tests/
+            '''
         }
+    }
+         }
+        
     }
 
     post {
