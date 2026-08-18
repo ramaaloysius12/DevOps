@@ -39,22 +39,7 @@ pipeline {
                 dir('hris_web') {
                     sh '''
                         . ${VENV_NAME}/bin/activate
-                        
-                        # Cek apakah folder tests ada, jika tidak jalankan pytest di root atau lewati exit code 5
-                        if [ -d "tests" ]; then
-                            pytest -v tests/
-                        else
-                            echo "Folder 'tests' tidak ditemukan, menjalankan pytest di root..."
-                            pytest -v || EXIT_CODE=$?
-                            
-                            # Jika exit code adalah 5 (tidak ada test ditemukan), anggap sukses sementara
-                            if [ "${EXIT_CODE}" = "5" ]; then
-                                echo "Peringatan: Belum ada file test yang ditemukan (Exit code 5)."
-                                exit 0
-                            elif [ "${EXIT_CODE}" != "0" ]; then
-                                exit ${EXIT_CODE}
-                            fi
-                        fi
+                        pytest -v test_app.py
                     '''
                 }
             }
