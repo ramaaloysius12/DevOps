@@ -1,10 +1,6 @@
 pipeline {
     agent any
 
-    environment {
-        VENV_NAME = 'envname'
-    }
-
     stages {
         stage('1. Checkout Code') {
             steps {
@@ -18,15 +14,19 @@ pipeline {
                 echo 'Memeriksa dan menyiapkan virtual environment serta dependencies...'
                 dir('hris_web') {
                     sh '''
-                        if [ ! -d "${VENV_NAME}" ]; then
-                            python3 -m venv ${VENV_NAME}
-                        fi
+                        # 1. Buat venv jika belum ada
+                        python3 -m venv envname
 
-                        . ${VENV_NAME}/bin/activate
+                        # 2. Aktifkan venv dan upgrade pip
+                        . envname/bin/activate
                         pip install --upgrade pip
+
+                        # 3. Install requirements jika file-nya ada
                         if [ -f "requirements.txt" ]; then
                             pip install -r requirements.txt
                         fi
+
+                        # 4. Install pytest
                         pip install pytest
                     '''
                 }
@@ -38,7 +38,7 @@ pipeline {
                 echo 'Menjalankan unit testing dengan pytest...'
                 dir('hris_web') {
                     sh '''
-                        . ${VENV_NAME}/bin/activate
+                        . envname/bin/activate
                         pytest -v test_app.py
                     '''
                 }
