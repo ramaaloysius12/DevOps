@@ -13,21 +13,21 @@ pipeline {
             steps {
                 echo 'Memeriksa dan menyiapkan virtual environment serta dependencies...'
                 sh '''
-                    # 1. Buat venv langsung di root workspace jika belum ada
+                    # Pastikan folder envname dibuat jika belum ada
                     if [ ! -d "envname" ]; then
                         python3 -m venv envname
                     fi
 
-                    # 2. Aktifkan venv dan update pip
+                    # Aktifkan virtual environment dan update pip
                     . envname/bin/activate
                     pip install --upgrade pip
 
-                    # 3. Install requirements jika ada
+                    # Install requirements.txt jika ada
                     if [ -f "requirements.txt" ]; then
                         pip install -r requirements.txt
                     fi
 
-                    # 4. Pastikan pytest terinstal
+                    # Pastikan pytest terinstal
                     pip install pytest
                 '''
             }
@@ -37,7 +37,7 @@ pipeline {
             steps {
                 echo 'Menjalankan unit testing dengan pytest...'
                 sh '''
-                    # Aktifkan virtual environment lalu jalankan test_app.py di root
+                    # Aktifkan virtual environment lalu jalankan test_app.py
                     . envname/bin/activate
                     pytest -v test_app.py
                 '''
