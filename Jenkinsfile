@@ -15,26 +15,24 @@ pipeline {
         }
 
         stage('2. Setup Environment & Dependencies') {
-            steps {
-                echo 'Memeriksa dan menyiapkan virtual environment serta dependencies...'
-                sh '''
-                    # Jika folder venv (envname) belum ada, buat baru
-                    if [ ! -d "${VENV_NAME}" ]; then
-                        python3 -m venv ${VENV_NAME}
-                    fi
-                    
-                    # Aktifkan virtual environment dan instal kebutuhan project
-                    . ${VENV_NAME}/bin/activate
-                    pip install --upgrade pip
-                    if [ -f "requirements.txt" ]; then
-                        pip install -r requirements.txt
-                    fi
-                    
-                    # Pastikan pytest terinstal
-                    pip install pytest
-                '''
-            }
-        }
+    steps {
+        echo 'Memeriksa dan menyiapkan virtual environment serta dependencies...'
+        sh '''
+            # Buat virtual environment jika belum ada
+            if [ ! -d "envname" ]; then
+                python3 -m venv envname
+            fi
+
+            # Aktifkan virtual environment dan instal dependencies
+            . envname/bin/activate
+            pip install --upgrade pip
+            if [ -f "requirements.txt" ]; then
+                pip install -r requirements.txt
+            fi
+        '''
+    }
+}
+
 
         stage('3. Run Pytest') {
             steps {
