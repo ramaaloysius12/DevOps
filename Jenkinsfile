@@ -13,10 +13,11 @@ pipeline {
             steps {
                 echo 'Memeriksa dan menyiapkan virtual environment serta dependencies...'
                 sh '''
-                    # Pastikan folder envname dibuat jika belum ada
-                    if [ ! -d "envname" ]; then
-                        python3 -m venv envname
-                    fi
+                    # Hapus folder venv lama jika ada untuk menghindari file corrupt/hilang
+                    rm -rf envname
+
+                    # Buat virtual environment baru yang bersih
+                    python3 -m venv envname
 
                     # Aktifkan virtual environment dan update pip
                     . envname/bin/activate
