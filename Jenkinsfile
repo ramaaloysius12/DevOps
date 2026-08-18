@@ -2,7 +2,6 @@ pipeline {
     agent any
 
     environment {
-        // Nama virtual environment yang sudah ada di folder hris_web
         VENV_NAME = 'envname'
     }
 
@@ -15,33 +14,36 @@ pipeline {
         }
 
         stage('2. Setup Environment & Dependencies') {
-    steps {
-        echo 'Memeriksa dan menyiapkan virtual environment serta dependencies...'
-        sh '''
-            # Buat virtual environment jika belum ada
-            if [ ! -d "envname" ]; then
-                python3 -m venv envname
-            fi
+            steps {
+                echo 'Memeriksa dan menyiapkan virtual environment serta dependencies...'
+                dir('hris_web') {
+                    sh '''
+                        # Buat virtual environment jika belum ada
+                        if [ ! -d "${VENV_NAME}" ]; then
+                            python3 -m venv ${VENV_NAME}
+                        fi
 
-            # Aktifkan virtual environment dan instal dependencies
-            . envname/bin/activate
-            pip install --upgrade pip
-            if [ -f "requirements.txt" ]; then
-                pip install -r requirements.txt
-            fi
-        '''
-    }
-}
-
+                        # Aktifkan virtual environment dan instal dependencies
+                        . ${VENV_NAME}/bin/activate
+                        pip install --upgrade pip
+                        if [ -f "requirements.txt" ]; then
+                            pip install -r requirements.txt
+                        fi
+                    '''
+                }
+            }
+        }
 
         stage('3. Run Pytest') {
             steps {
                 echo 'Menjalankan unit testing dengan pytest...'
-                sh '''
-                    # Aktifkan virtual environment lalu jalankan pytest
-                    . ${VENV_NAME}/bin/activate
-                    pytest -v
-                '''
+                dir('hris_web') {
+                    sh '''
+                        # Aktifkan virtual environment lalu jalankan pytest
+                        . ${VENV_NAME}/bin/activate
+                        pytest -v
+                    '''
+                }
             }
         }
     }
