@@ -12,43 +12,42 @@ pipeline {
         stage('2. Setup Environment & Dependencies') {
             steps {
                 echo 'Memeriksa dan menyiapkan virtual environment serta dependencies...'
-                dir('hris_web') {
-                    sh '''
-                        # 1. Buat venv jika belum ada
+                sh '''
+                    # 1. Buat venv langsung di root workspace jika belum ada
+                    if [ ! -d "envname" ]; then
                         python3 -m venv envname
+                    fi
 
-                        # 2. Aktifkan venv dan upgrade pip
-                        . envname/bin/activate
-                        pip install --upgrade pip
+                    # 2. Aktifkan venv dan update pip
+                    . envname/bin/activate
+                    pip install --upgrade pip
 
-                        # 3. Install requirements jika file-nya ada
-                        if [ -f "requirements.txt" ]; then
-                            pip install -r requirements.txt
-                        fi
+                    # 3. Install requirements jika ada
+                    if [ -f "requirements.txt" ]; then
+                        pip install -r requirements.txt
+                    fi
 
-                        # 4. Install pytest
-                        pip install pytest
-                    '''
-                }
+                    # 4. Pastikan pytest terinstal
+                    pip install pytest
+                '''
             }
         }
 
         stage('3. Run Pytest') {
             steps {
                 echo 'Menjalankan unit testing dengan pytest...'
-                dir('hris_web') {
-                    sh '''
-                        . envname/bin/activate
-                        pytest -v test_app.py
-                    '''
-                }
+                sh '''
+                    # Aktifkan virtual environment lalu jalankan test_app.py di root
+                    . envname/bin/activate
+                    pytest -v test_app.py
+                '''
             }
         }
     }
 
     post {
         success {
-            echo 'CI Pipeline Berhasil! Semua unit test pytest di hris_web lulus.'
+            echo 'CI Pipeline Berhasil! Semua unit test pytest lulus.'
         }
         failure {
             echo 'CI Pipeline Gagal! Silakan cek log pengujian pytest.'
